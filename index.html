@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Digital span</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <style>
+    body {
+      display: flex;
+      padding-top: 300px;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      text-align: center;
+    }
+    #play {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script>
+  const generateNums = (n) => {
+    return [...Array(n)].map(() => Math.floor(Math.random() * 9));
+  };
+  const playNums = (arr) => {
+    // debugger;
+    setTimeout(() => {
+      $('#answer-submit').prop('disabled', false)
+      $('#answer').prop('disabled', false)
+      $('#answer').focus();
+    }, 1000 * arr.length)
+    for (let i = 0; i < arr.length; i++) {
+      let num = arr[i]
+      setTimeout(() => $(`#aud-${num}`)[0].play(), 1000 * i)
+    }
+  }
+  const isValid = (current) => {
+    return JSON.stringify($('#answer').val().split('').map((n) => parseInt(n))) == JSON.stringify(current)
+  }
+  $(document).ready(function() {
+    let age;
+    let currentStep = 2;
+    let stepMistakes = 0;
+    let currentSubstep = 1;
+    let totalForward = 0;
+    let total = 0;
+    let currentQuiz = generateNums(currentStep);
+    let isReverse = false;
+    $('#forward-instr').hide();
+    $('#reverse-instr').hide();
+    $('#test').hide()
+    $('#audio').hide()
+    $('#accept-forward').on('click', (e) => {
+      e.preventDefault()
+      $('#forward-instr').hide()
+      $('#test').show()
+    })
+    $('#accept-reverse').on('click', (e) => {
+      e.preventDefault()
+      $('#reverse-instr').hide();
+      $('#test').show();
+      $('#play').show();
+    })
+    $('#person').on('submit', (e) => {
+      e.preventDefault()
+      age = $('#age')
+      $('#person').hide()
+      $('#forward-instr').show()
+    })
+    $('#play').on('click', (e) => {
+      e.preventDefault()
+      $('#answer').val('');
+      $('#hint').hide()
+      $('#play').hide()
+      playNums(currentQuiz)
+    })
+    $('#answer-submit').on('click', (e) => {
+      e.preventDefault();
+      const valid = isValid(isReverse ? currentQuiz.reverse() : currentQuiz);
+      let shouldShowInstrRev = false;
+      if (valid) {
+        total += 1
+        currentSubstep += 1;
+      } else {
+        currentSubstep += 1;
+        stepMistakes += 1;
+      }
+      if (currentSubstep === 3) {
+        currentSubstep = 1;
+        if (stepMistakes === 2) {
+          if (isReverse) {
+            $('#test').hide()
+            $('#result').text("Your score: Forward(" + totalForward + ') ' + 'and Backward(' + total + ')')
+          } else {
+            currentStep = 2;
+            isReverse = true;
+            shouldShowInstrRev = true;
+            totalForward = total;
+            total = 0;
+          }
+        } else {
+          currentStep += 1;
+        }
+        stepMistakes = 0;
+      }
+      currentQuiz = generateNums(currentStep)
+      if (valid) {
+        $('#hint').text('Answer was correct')
+      } else {
+        $('#hint').text('Answer was incorrect')
+      }
+      $('#answer-submit').prop('disabled', true);
+      $('#answer').prop('disabled', true);
+      $('#answer').val('');
+      if (shouldShowInstrRev) {
+        $('#reverse-instr').show();
+        $('#test').hide();
+      } else {
+        $('#hint').show();
+        $('#play').show();
+      }
+    })
+  });
+</script>
+
+
+<div class="container">
+  <form action="#" id="person">
+    <label for="age">Age</label>
+    <input type="number" id="age">
+    <button class='btn btn-primary' type="Submit">Submit</button>
+  </form>
+  <div id="forward-instr">
+    <p>Type in numbers as you've heard them. You can only listen to them once</p>
+    <button class='btn btn-primary' id="accept-forward">I'm ready</button>
+  </div>
+  <div id="reverse-instr">
+    <p>Second part</p>
+    <p>Type in numbers <b>IN REVERSE</b> order as you've heard them. You can only listen to them once</p>
+    <button class='btn btn-primary' id="accept-reverse">I'm ready</button>
+  </div>
+  <form id="test">
+    <icon id="play">Listen 🔊</icon>
+    <br/>
+    <input id="answer" type="text" disabled>
+    <button class='btn btn-primary' id="answer-submit" disabled>Submit</button>
+    <br>
+    <p id="hint"></p>
+  </form>
+  <div id="result">
+  </div>
+  <div id="audio">
+    <audio id="aud-0" src="sounds/0.wav"></audio>
+    <audio id="aud-1" src="sounds/1.wav"></audio>
+    <audio id="aud-2" src="sounds/2.wav"></audio>
+    <audio id="aud-3" src="sounds/3.wav"></audio>
+    <audio id="aud-4" src="sounds/4.wav"></audio>
+    <audio id="aud-5" src="sounds/5.wav"></audio>
+    <audio id="aud-6" src="sounds/6.wav"></audio>
+    <audio id="aud-7" src="sounds/7.wav"></audio>
+    <audio id="aud-8" src="sounds/8.wav"></audio>
+    <audio id="aud-9" src="sounds/9.wav"></audio>
+  </div>
+</div>
+</body>
+</html>
