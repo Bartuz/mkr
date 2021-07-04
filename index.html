@@ -39,6 +39,19 @@
   const isValid = (current) => {
     return JSON.stringify($('#answer').val().split('').map((n) => parseInt(n))) == JSON.stringify(current)
   }
+  const submitResults = (age, forward, backward) => {
+    fetch("https://docs.google.com/forms/u/0/d/e/1FAIpQLSeDtFzyWM4X9XGnYdVN26GmR99fAXz_WzQ9FujMHIeibYNCbg/formResponse", {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      "referrer": "https://docs.google.com/forms/d/e/1FAIpQLSeDtFzyWM4X9XGnYdVN26GmR99fAXz_WzQ9FujMHIeibYNCbg/viewform?fbzx=-8739665497451994986",
+      "referrerPolicy": "strict-origin-when-cross-origin",
+      "body": `entry.19718914=${age}&entry.670023049=${forward}&entry.1670461270=${backward}&fvv=1&draftResponse=%5Bnull%2Cnull%2C%22-8739665497451994986%22%5D%0D%0A&pageHistory=0&fbzx=-8739665497451994986`,
+      "method": "POST",
+      mode: "no-cors",
+      "credentials": "include"
+    });
+  }
   $(document).ready(function() {
     let age;
     let currentStep = 2;
@@ -65,7 +78,7 @@
     })
     $('#person').on('submit', (e) => {
       e.preventDefault()
-      age = $('#age')
+      age = $('#age').val()
       $('#person').hide()
       $('#forward-instr').show()
     })
@@ -93,6 +106,7 @@
           if (isReverse) {
             $('#test').hide()
             $('#result').text("Your score: Forward(" + totalForward + ') ' + 'and Backward(' + total + ')')
+            submitResults(age, totalForward, total)
           } else {
             currentStep = 2;
             isReverse = true;
